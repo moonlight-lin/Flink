@@ -149,14 +149,14 @@ public class WordCount {
         }
     }
     
-	public static void main(String[] args) throws ParseException {
-	    /**
-	     * 解析输入参数
-	     */
-	    String inputFile;
-	    String outputFile;
-	    
-	    Options options = new Options();
+    public static void main(String[] args) throws ParseException {
+        /**
+         * 解析输入参数
+         */
+        String inputFile;
+        String outputFile;
+        
+        Options options = new Options();
         options.addOption("i", "input", true, "input file");
         options.addOption("o", "output", true, "output file");
         
@@ -171,5 +171,5 @@ public class WordCount {
          */
         WordCount wordCount = new WordCount();
         wordCount.execute(inputFile, outputFile);
-	}
+    }
 }
