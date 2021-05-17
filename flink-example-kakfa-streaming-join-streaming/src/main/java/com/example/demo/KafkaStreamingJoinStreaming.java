@@ -216,9 +216,21 @@ public class KafkaStreamingJoinStreaming {
             // 这种 join 操作不需要定义窗口，
             // 对于第一个 stream 的每个数据 a，都会寻找第二个 stream 内的时间戳和 a 的差在 between(lowerBound, upperBound) 范围内的数据,
             // 将这些数据分别和 a 组合传给 join 函数,
-            // 前面设置的 watermark 在这里不起作用，而是由 between 决定
             // 
-            // currentWatermark = min(stream_1 收到的最大 time, stream_2 收到的最大 time) - upperBound
+            // watermark 依然由 MyWatermarkStrategy 决定，但这个 watermark 不比较窗口，
+            // 而是每个数据都和 watermark 比较，决定会不会丢弃，
+            // 比如 outOfOrdernessMillis 是 3 分钟，当前所有收到数据的最大时间戳是 08:15，
+            // 那么新到来的数据如果时间戳小于 08:12 就会被丢弃，
+            //
+            // 另外，由于数据需要缓存，以等待另一个流的数据，这个等待时间由 watermark 和 upperBound 决定，
+            // 当 watermark 超过数据时间 + upperBound 时，数据就从缓存删除，
+            // 比如 outOfOrdernessMillis 是 3 分钟，当前所有收到数据的最大时间戳是 08:15，watermark 就是 08:12，
+            // 此时来了一条 08:13 的数据，大于 watermark 所以被缓存起来，然后到另一个流的缓存寻找匹配的数据，
+            // 然后暂时不会删除，因为另一个流有可能还会有匹配的数据进来，
+            // 假设 upperBound 是 1 分钟，后来又有 08:18 的数据进来，watermark 被更新为 08:15，
+            // 超过了 08:13 + 00:01，所以 08:13 这条数据就会被删除，
+            // 
+            // 具体可以参考 IntervalJoinOperator
             
             result = watermarkStream_1
                     .keyBy(value -> value.getId())
