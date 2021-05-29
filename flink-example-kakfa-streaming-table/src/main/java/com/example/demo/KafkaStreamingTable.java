@@ -404,6 +404,8 @@ public class KafkaStreamingTable {
                 // 以 Kafka 为例，就是创建 Kafka 表，然后 insert 数据到这张表，就相当于发送数据到这个 Topic
                 
                 // create 的字段的顺序必须和 select 的顺序一致
+
+                // 如果输入输出都通过 SQL DDL 实现，那实际上不需要定义接受数据和输出数据的类，少了很多代码，而且更灵活
                 
                 tableEnv.executeSql(
                         "create table Kafka_Sink (" +
